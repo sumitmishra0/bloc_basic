@@ -26,11 +26,13 @@ class MyApp extends StatelessWidget {
 }
 
 class HomePage extends StatelessWidget {
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Home"),
+        title: const Text("Home"),
       ),
       body: BlocBuilder<ListBloc, ListState>(builder: (_, state) {
         List<Map<String, dynamic>> mapData = state.mData;
@@ -39,17 +41,35 @@ class HomePage extends StatelessWidget {
             itemBuilder: (_, index) {
               Map<String, dynamic> eachMap = mapData[index];
               return ListTile(
-                title: Text(eachMap['title']),
+                onTap: () {
+                  BlocProvider.of<ListBloc>(context).add(UpdateMapEvent(
+                      updateMap: {"title": "Update Hello", "desc": "world"},
+                      index: index));
+                },
+                trailing: IconButton(
+                    onPressed: () {
+                      context
+                          .read<ListBloc>()
+                          .add(DeleteMapEvent(index: index));
+                    },
+                    icon: const Icon(Icons.delete)),
+                // leading: IconButton(
+                //     onPressed: () {
+                //       BlocProvider.of<ListBloc>(context).add(UpdateMapEvent(
+                //           updateMap: {"title": "Update Hello", "desc": "world"},
+                //           index: index));
+                //     },
+                //     icon: const Icon(Icons.edit)),
+                title: Text("${eachMap['title']} ${index + 1}"),
                 subtitle: Text(eachMap['desc']),
               );
             });
       }),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          context.read<ListBloc>().add(AddMapEvent(newMap: {
-            "title" : "Hello",
-            "desc" : "World"
-          }));
+          context
+              .read<ListBloc>()
+              .add(AddMapEvent(newMap: {"title": "Hello", "desc": "World"}));
         },
         child: const Icon(Icons.add),
       ),
